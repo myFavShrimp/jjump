@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap;
 
 /// JJumping is the first step towards reaching new heights.
@@ -12,10 +14,10 @@ use clap;
 )]
 pub struct Args {
     #[clap(subcommand)]
-    sub: Option<Commands>,
+    pub subcommand: Option<Commands>,
 
     #[clap(flatten)]
-    goto: Option<CommandGoto>,
+    pub goto: Option<CommandGoto>,
 }
 
 #[derive(clap::Parser, Debug)]
@@ -29,14 +31,14 @@ pub enum Commands {
 #[derive(clap::Parser, Debug)]
 pub struct CommandAdd {
     /// Where do you want your portal to point at?
-    destination: String,
+    pub destination: PathBuf,
 
     /// Assign one or multiple names to your portal.
-    names: Vec<String>,
+    pub names: Vec<String>,
 }
 
 #[derive(clap::Parser, Debug)]
 pub struct CommandGoto {
     /// Use a portal to jump to your target directory and conquer the (un)known.
-    name: String,
+    pub name: String,
 }
