@@ -1,7 +1,6 @@
-use std::{fs::canonicalize, process::Command};
+use std::fs::canonicalize;
 
 use clap::Parser;
-use config::ConfigError;
 use eyre::Result;
 use thiserror::Error;
 
@@ -20,6 +19,7 @@ fn main() -> Result<()> {
         match command {
             cli::Commands::Add(add_args) => add_entry(app_config, add_args),
             cli::Commands::Goto(goto_args) => goto_entry(app_config, goto_args),
+            cli::Commands::Rem(rem_args) => remove_entry(app_config, rem_args),
         }?;
     };
 
@@ -32,12 +32,14 @@ enum JJumpError {
     PathError(#[from] std::io::Error),
     #[error("error with config file")]
     ConfigError(#[from] config::ConfigError),
+    #[error("could not find the portal in config")]
+    PortalNotFoundError,
 }
 
 fn add_entry(mut config: config::Config, add_args: cli::CommandAdd) -> Result<(), JJumpError> {
     let path = canonicalize(&add_args.destination)?;
 
-    let mut portal_names = dbg!(config.portals.remove(&path))
+    let mut portal_names = config.portals.remove(&path)
         .map(|mut entries| {
             entries.extend(add_args.names.clone());
             entries
@@ -62,7 +64,23 @@ fn goto_entry(config: config::Config, goto_args: cli::CommandGoto) -> Result<(),
         }
 
         println!("{:?}", path);
+        break;
     }
 
     Ok(())
+}
+
+fn remove_entry(mut config: config::Config, rem_args: cli::CommandRemove) -> Result<(), JJumpError> {
+    let portal_name = rem_args.name;
+
+    return match config.portals.clone().iter().find(|(.., portal_names)| portal_names.contains(&portal_name)) {
+        Some((path, ..)) => {
+            if config.portals.remove(path).is_some() {
+                config::write(dbg!(config))?;
+                Ok(())
+            } else {
+                Err(JJumpError::PortalNotFoundError)
+            }},
+        None => Err(JJumpError::PortalNotFoundError),
+    }
 }

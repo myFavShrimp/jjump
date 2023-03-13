@@ -43,6 +43,7 @@ fn file_reader(file_path: &PathBuf) -> Result<BufReader<File>, std::io::Error> {
 fn file_writer(file_path: &PathBuf) -> Result<BufWriter<File>, std::io::Error> {
     OpenOptions::new()
         .write(true)
+        .truncate(true)
         .open(file_path)
         .map(|file| BufWriter::new(file))
 }

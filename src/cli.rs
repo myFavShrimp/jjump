@@ -26,6 +26,8 @@ pub enum Commands {
     Add(CommandAdd),
     /// Use one of your portals.
     Goto(CommandGoto),
+    /// Remove a portal portal.
+    Rem(CommandRemove),
 }
 
 #[derive(clap::Parser, Debug)]
@@ -40,5 +42,11 @@ pub struct CommandAdd {
 #[derive(clap::Parser, Debug)]
 pub struct CommandGoto {
     /// Use a portal to jump to your target directory and conquer the (un)known.
+    pub name: String,
+}
+
+#[derive(clap::Parser, Debug)]
+pub struct CommandRemove {
+    /// Deletes all portals of the path the portal points at.
     pub name: String,
 }
